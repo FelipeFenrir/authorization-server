@@ -1,7 +1,6 @@
 package com.microservicos.authserver.configuracao;
 
 import com.nimbusds.jose.jwk.JWKSet;
-
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -24,15 +23,16 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
+import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.UUID;
 
 @Configuration
@@ -46,76 +46,88 @@ public class SecurityConfig {
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .oidc(Customizer.withDefaults());
 
-        http.exceptionHandling(e -> e
-                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")));
-
+        http.exceptionHandling(
+                e -> e.authenticationEntryPoint(
+                        new LoginUrlAuthenticationEntryPoint("/login")
+                )
+        );
 
         return http.build();
-
     }
 
     @Bean
     @Order(2)
     public SecurityFilterChain appSecurityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .formLogin()
+        http.formLogin()
                 .and()
-                .authorizeHttpRequests(request -> request
-                        .anyRequest().authenticated())
-                .build();
-    }
+                .authorizeHttpRequests().anyRequest().authenticated();
 
+        return http.build();
+    }
 
     @Bean
     public UserDetailsService userDetailsService() {
-        var u1 = User.withUsername("matheus")
-                .password("123")
+        var u1 = User.withUsername("user")
+                .password("password")
                 .authorities("read")
                 .build();
+
         return new InMemoryUserDetailsManager(u1);
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
-        return  NoOpPasswordEncoder.getInstance();
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
-    public RegisteredClientRepository registeredClientRepository(){
-        RegisteredClient c1 = RegisteredClient.withId(UUID.randomUUID().toString())
+    public RegisteredClientRepository registeredClientRepository() {
+        RegisteredClient r1 = RegisteredClient.withId(UUID.randomUUID().toString())
                 .clientId("client")
                 .clientSecret("secret")
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
                 .redirectUri("https://springone.io/authorized")
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .build();
-        return new InMemoryRegisteredClientRepository(c1);
+
+        return new InMemoryRegisteredClientRepository(r1);
     }
 
     @Bean
-    public AuthorizationServerSettings authorizationSettings(){
-        return AuthorizationServerSettings.builder().build();
+    public AuthorizationServerSettings authorizationServerSettings() {
+        return AuthorizationServerSettings.builder()
+                .build();
     }
 
     @Bean
-    public JWKSource<SecurityContext> jwkSource() throws NoSuchAlgorithmException {
+    public JWKSource<SecurityContext> jwkSource() throws Exception {
+        KeyPairGenerator kg = KeyPairGenerator.getInstance("RSA");
+        kg.initialize(2048);
+        KeyPair kp = kg.generateKeyPair();
 
-        KeyPairGenerator key = KeyPairGenerator.getInstance("RSA");
-        key.initialize(2048);
-        var kp  = key.generateKeyPair();
+        RSAPublicKey publicKey = (RSAPublicKey) kp.getPublic();
+        RSAPrivateKey privateKey = (RSAPrivateKey) kp.getPrivate();
 
-        RSAPublicKey rsaPublicKey = (RSAPublicKey) kp.getPublic();
-        RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) kp.getPrivate();
-
-        RSAKey rsaKey = new RSAKey.Builder(rsaPublicKey)
-                .privateKey(rsaPrivateKey)
+        RSAKey key = new RSAKey.Builder(publicKey)
+                .privateKey(privateKey)
                 .keyID(UUID.randomUUID().toString())
                 .build();
-        JWKSet jwkSet = new JWKSet(rsaKey);
-        return new ImmutableJWKSet<>(jwkSet);
 
+        JWKSet set = new JWKSet(key);
+        return new ImmutableJWKSet(set);
     }
+
+
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> oAuth2TokenCustomizer(){
+        return context -> {
+            context.getClaims()
+                    .claim("teste", "teste");
+        };
+    }
+
 }
