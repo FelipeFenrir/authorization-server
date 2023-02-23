@@ -1,5 +1,11 @@
 package com.microservicos.authserver.configuracao;
 
+import com.nimbusds.jose.jwk.JWKSet;
+
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -22,6 +28,11 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.UUID;
 
 @Configuration
@@ -47,7 +58,6 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain appSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf().disable()
                 .formLogin()
                 .and()
                 .authorizeHttpRequests(request -> request
@@ -77,7 +87,7 @@ public class SecurityConfig {
                 .clientSecret("secret")
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
-                .redirectUri("http://springone.io/authorized")
+                .redirectUri("https://springone.io/authorized")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
@@ -88,5 +98,24 @@ public class SecurityConfig {
     @Bean
     public AuthorizationServerSettings authorizationSettings(){
         return AuthorizationServerSettings.builder().build();
+    }
+
+    @Bean
+    public JWKSource<SecurityContext> jwkSource() throws NoSuchAlgorithmException {
+
+        KeyPairGenerator key = KeyPairGenerator.getInstance("RSA");
+        key.initialize(2048);
+        var kp  = key.generateKeyPair();
+
+        RSAPublicKey rsaPublicKey = (RSAPublicKey) kp.getPublic();
+        RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) kp.getPrivate();
+
+        RSAKey rsaKey = new RSAKey.Builder(rsaPublicKey)
+                .privateKey(rsaPrivateKey)
+                .keyID(UUID.randomUUID().toString())
+                .build();
+        JWKSet jwkSet = new JWKSet(rsaKey);
+        return new ImmutableJWKSet<>(jwkSet);
+
     }
 }
