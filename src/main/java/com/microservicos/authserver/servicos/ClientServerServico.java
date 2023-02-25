@@ -3,9 +3,11 @@ package com.microservicos.authserver.servicos;
 
 import com.microservicos.authserver.modelos.entidades.ClientServer;
 import com.microservicos.authserver.repositorios.ClientRepositorio;
+import com.netflix.discovery.converters.Auto;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,8 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class ClientServerServico implements RegisteredClientRepository {
 
-    private final ClientRepositorio clientRepositorio;
+    @Autowired
+    private ClientRepositorio clientRepositorio;
 
     @Override
     public void save(RegisteredClient registeredClient) {
