@@ -33,7 +33,7 @@ public class ClientServerServico implements RegisteredClientRepository {
 
     @Override
     public RegisteredClient findByClientId(String clientId) {
-        var a = clientRepositorio.findByClientId(clientId).orElseThrow();
+        var a = clientRepositorio.findClientServerByClientId(clientId).orElseThrow();
         return ClientServer.from(a);
     }
 }
