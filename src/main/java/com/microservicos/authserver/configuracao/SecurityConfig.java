@@ -93,28 +93,7 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    @Bean
-    public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient r1 = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId("matheus")
-                .clientSecret(passwordEncoder().encode("secret"))
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .scope(OidcScopes.OPENID)
-                .scope(OidcScopes.PROFILE)
-                .redirectUri("https://oidcdebugger.com/debug")
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .tokenSettings(TokenSettings.builder()
-                        .accessTokenFormat(OAuth2TokenFormat.REFERENCE)
-                        .accessTokenTimeToLive(Duration.ofSeconds(900))
-                        .build()
-                )
-                .build();
-
-        return new InMemoryRegisteredClientRepository(r1);
-    }
+    
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
