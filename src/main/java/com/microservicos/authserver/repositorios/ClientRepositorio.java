@@ -10,7 +10,9 @@ import java.util.Optional;
 @Repository
 public interface ClientRepositorio extends JpaRepository<ClientServer, Long> {
 
-    @Query(value = "SELECT * FROM tb_client where tb_client.client_id = ?1", nativeQuery = true)
+    @Query(value = "SELECT * FROM tb_client WHERE tb_client.client_id = ?1", nativeQuery = true)
     Optional<ClientServer> findClientServerByClientId(String clientId);
+
+
 
 }

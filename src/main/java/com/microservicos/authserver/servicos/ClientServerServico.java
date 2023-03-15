@@ -3,10 +3,8 @@ package com.microservicos.authserver.servicos;
 
 import com.microservicos.authserver.modelos.entidades.ClientServer;
 import com.microservicos.authserver.repositorios.ClientRepositorio;
-import com.netflix.discovery.converters.Auto;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;

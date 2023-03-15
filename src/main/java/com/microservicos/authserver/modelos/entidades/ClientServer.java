@@ -5,8 +5,11 @@ import lombok.Data;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 
 import java.io.Serializable;
+import java.time.Duration;
 
 @Data
 @Entity(name = "tb_client")
@@ -43,6 +46,11 @@ public class ClientServer implements Serializable {
                .redirectUri(clientServer.getRedirectUri())
                .clientAuthenticationMethod(new ClientAuthenticationMethod(clientServer.getAuthMethod()))
                .authorizationGrantType(new AuthorizationGrantType(clientServer.getGrantType()))
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .tokenSettings(TokenSettings.builder()
+                        .accessTokenFormat(OAuth2TokenFormat.REFERENCE)
+                        .accessTokenTimeToLive(Duration.ofHours(24))
+                        .build())
                .build();
     }
 

@@ -1,6 +1,8 @@
-package com.microservicos.authserver.modelos.dtos;
+package com.microservicos.authserver.modelos.entidades;
 
 
+import com.microservicos.authserver.modelos.dtos.Role;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,15 +10,21 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Data
-public class AutenticacaoDTO implements UserDetails, Serializable {
+@Entity
+public class Autenticacao implements UserDetails, Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     private String email;
 
     private String senha;
 
     private List<Role> roles;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
