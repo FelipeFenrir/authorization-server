@@ -1,8 +1,6 @@
 package com.microservicos.authserver.servicos;
 
-import com.microservicos.authserver.clients.ControleUsuarioClient;
 import jakarta.transaction.Transactional;
-import org.apache.commons.lang.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

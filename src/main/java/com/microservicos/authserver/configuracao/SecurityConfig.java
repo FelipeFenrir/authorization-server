@@ -61,16 +61,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private Consumer<List<AuthenticationProvider>> getAuthorizationEndpointProvider() {
-        return providers -> {
-            for (AuthenticationProvider p : providers){
-                if(p instanceof OAuth2AuthorizationCodeRequestAuthenticationProvider x){
-                    x.setAuthenticationValidator(new CustomRedirectUriValidator());
-                }
-            }
-        };
-    }
-
     @Bean
     @Order(2)
     public SecurityFilterChain appSecurityFilterChain(HttpSecurity http) throws Exception {

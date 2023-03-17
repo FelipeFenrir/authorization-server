@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-public class Autenticacao implements UserDetails, Serializable {
+public class Credencial implements UserDetails, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
