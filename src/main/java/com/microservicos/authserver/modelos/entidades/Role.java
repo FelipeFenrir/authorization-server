@@ -1,4 +1,4 @@
-package com.microservicos.authserver.modelos.dtos;
+package com.microservicos.authserver.modelos.entidades;
 
 import com.microservicos.authserver.enums.RoleEnum;
 import jakarta.persistence.*;
@@ -13,12 +13,10 @@ public class Role implements GrantedAuthority {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RoleEnum identificador;
+    private String identificador;
 
     @Override
     public String getAuthority() {
-        return this.identificador.toString();
+        return this.identificador;
     }
 }
